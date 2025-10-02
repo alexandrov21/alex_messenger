@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "678496039957",
+    "project_id": "alexmessenger-d2f45",
+    "storage_bucket": "alexmessenger-d2f45.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:678496039957:android:b75bba51bce74e0ad3ca1c",
+        "android_client_info": {
+          "package_name": "com.example.alex_messenger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWRcJW5HUFntHdHXJNVO40VNFdKAOHGvo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
