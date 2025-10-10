@@ -1,6 +1,7 @@
 import 'package:alex_messenger/pages/sign_in_page/sign_in_page.dart';
 import 'package:flutter/material.dart';
 
+import '../../services/auth_services/auth_service.dart';
 import '../main_page/main_page.dart';
 
 class SignUpPage extends StatefulWidget {
@@ -11,6 +12,41 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _authService = AuthService();
+
+  // Future<void> _signUp() async {
+  //   try {
+  //     await AuthService.signIn(
+  //       _emailController.text.trim(),
+  //       _passwordController.text.trim(),
+  //     );
+  //     Navigator.of(context).pushNamedAndRemoveUntil(
+  //       '/main',
+  //           (route) => false, // видаляє всі попередні сторінки
+  //     );
+  //   } catch (e) {
+  //     _showErrorDialog(e.toString().replaceFirst('Exception: ', ''));
+  //   }
+  // }
+  //
+  // void _showErrorDialog(String message) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Помилка'),
+  //       content: Text(message),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () => Navigator.of(context).pop(),
+  //           child: const Text('OK'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +82,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 SizedBox(height: 20),
                 TextField(
+                  controller: _emailController,
                   decoration: InputDecoration(
                     labelText: 'EMAIL',
                     labelStyle: TextStyle(
@@ -64,6 +101,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 SizedBox(height: 20),
                 TextField(
+                  controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'PASSWORD',
                     labelStyle: TextStyle(
@@ -79,6 +117,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       borderSide: BorderSide(color: Colors.black),
                     ),
                   ),
+                  obscureText: true,
                 ),
                 SizedBox(height: 20),
                 TextField(
@@ -97,6 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       borderSide: BorderSide(color: Colors.black),
                     ),
                   ),
+                  obscureText: true,
                 ),
                 SizedBox(height: 40),
                 Row(
@@ -121,11 +161,18 @@ class _SignUpPageState extends State<SignUpPage> {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => MainPage()),
+                        onPressed: () async {
+                          final user = await AuthService.signUp(
+                            _emailController.text.trim(),
+                            _passwordController.text.trim(),
                           );
+
+                          if (user != null) {
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/main',
+                              (route) => false,
+                            );
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(

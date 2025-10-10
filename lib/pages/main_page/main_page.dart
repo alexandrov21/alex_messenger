@@ -20,6 +20,11 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.white,
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
+        onTap: (index) async {
+          if (index == 2) {
+            Navigator.of(context).pushNamed('/settings');
+          }
+        },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
