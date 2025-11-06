@@ -8,37 +8,47 @@ class AuthService {
 
   static Future<User?> signUp(String email, String password) async {
     try {
-      print("👉 Sign in start: $email");
       UserCredential credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
-      print("✅ Sign in success: ${credential.user?.email}");
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      // 🔴 Перетворюємо помилки Firebase у зрозумілий текст
-      throw Exception(_handleFirebaseError(e));
-    } catch (e) {
-      throw Exception("Невідома помилка: $e");
+      print('🔥 ERRORRRRRRRRRRFirebaseAuthException.code = ${e.code}');
+      print('🔥 ERRORRRRRRRRRRFirebaseAuthException.message = ${e.message}');
+      if (e.code == 'email-already-in-use') {
+        throw Exception('Ця адреса вже зареєстрована.');
+      } else if (e.code == 'invalid-email') {
+        throw Exception('Некоректний формат email.');
+      } else if (e.code == 'user-disabled') {
+        throw Exception('Обліковий запис користувача деактивовано.');
+      } else if (e.code == 'weak-password') {
+        throw Exception('Пароль занадто слабкий.');
+      } else {
+        throw Exception('Помилка входу: ${e.message}');
+      }
     }
     return null;
   }
 
   static Future<User?> signIn(String email, String password) async {
     try {
-      print("👉 Sign in start: $email");
       UserCredential credential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
       return credential.user;
     } on FirebaseAuthException catch (e) {
-      // 🔴 Перетворюємо помилки Firebase у зрозумілий текст
-      throw Exception(_handleFirebaseError(e));
-    } catch (e) {
-      throw Exception("Невідома помилка: $e");
+      if (e.code == 'invalid-credential') {
+        throw Exception('Неправильний логін або пароль.');
+      } else if (e.code == 'invalid-email') {
+        throw Exception('Некоректний формат email.');
+      } else if (e.code == 'user-disabled') {
+        throw Exception('Обліковий запис користувача деактивовано.');
+      } else {
+        throw Exception('Помилка входу: ${e.message}');
+      }
     }
-    return null;
   }
 
   static Future<void> signOut() async {
