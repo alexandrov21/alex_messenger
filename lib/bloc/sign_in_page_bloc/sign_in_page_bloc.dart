@@ -24,8 +24,10 @@ class SignInPageBloc extends Bloc<SignInPageEvent, SignInPageState> {
 
     try {
       final user = await AuthService.signIn(email, password);
-
+    
       if (user != null) {
+        // final userFromFirestore =  FirestoreService.getUserByUid(user.id);
+        // emit(SignInPageSuccessState(userFromFirestore));
         emit(SignInPageSuccessState());
       } else {
         emit(SignInPageErrorState('Помилка входу.'));
