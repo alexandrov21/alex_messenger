@@ -38,14 +38,23 @@ class SignUpPageBloc extends Bloc<SignUpPageEvent, SignUpPageState> {
     emit(SignUpPageLoadingState());
 
     try {
+      /// You use only firebaseAuth but you need Firestore Also 
+     
       final user = await AuthService.signUp(email, password);
-
+    
       if (user != null) {
         final fullInfo = SignUpModel(
           fullName: event.enteringFullName,
           email: email,
           uid: user.uid,
         );
+      // final userForFirestore =  AppUser(
+      //  uid - user.id
+      //  email - user.email aбо email,
+      //  nickname - event.enteringFullName
+      // );
+      // await FirebaseService.saveUser(userForFirestore); 
+        
         emit(SignUpPageSuccessState(fullInfo));
       } else {
         emit(SignUpPageErrorState('Помилка входу.'));
