@@ -1,4 +1,4 @@
-import '../../models/sign_up_model.dart';
+import '../../models/app_user.dart';
 
 abstract class SignUpPageState {}
 
@@ -7,9 +7,9 @@ class SignUpPageInitialState extends SignUpPageState {}
 class SignUpPageLoadingState extends SignUpPageState {}
 
 class SignUpPageSuccessState extends SignUpPageState {
-  final SignUpModel fullInfo;
+  final AppUser user;
 
-  SignUpPageSuccessState(this.fullInfo);
+  SignUpPageSuccessState(this.user);
 }
 
 class SignUpPageErrorState extends SignUpPageState {

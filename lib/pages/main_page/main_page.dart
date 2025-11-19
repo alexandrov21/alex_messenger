@@ -2,8 +2,11 @@ import 'package:alex_messenger/models/all_dialogs_model.dart';
 import 'package:flutter/material.dart';
 
 import '../../mocks/all_dialogs_mock.dart';
+import '../../models/app_user.dart';
 
 class MainPage extends StatefulWidget {
+  // final AppUser user;
+
   const MainPage({Key? key}) : super(key: key);
 
   @override
@@ -13,6 +16,9 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
+    // print("HOME UID: ${widget.user.uid}");
+    // print("HOME email: ${widget.user.email}");
+    // print("HOME name: ${widget.user.fullName}");
     final List<AllDialogsModel> dialogs = AllDialogsMock.allDialogs;
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
