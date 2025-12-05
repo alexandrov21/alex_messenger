@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../bloc/sign_up_page_bloc/sign_up_page_bloc.dart';
 import '../../bloc/sign_up_page_bloc/sign_up_page_event.dart';
 import '../../bloc/sign_up_page_bloc/sign_up_page_state.dart';
-import '../../services/auth_services/auth_service.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -87,9 +86,11 @@ class _SignUpPageState extends State<SignUpPage> {
         } else if (state is SignUpPageErrorState) {
           _showErrorDialog(state.errorMessage);
         } else if (state is SignUpPageSuccessState) {
-          Navigator.of(
-            context,
-          ).pushNamedAndRemoveUntil('/main', (route) => false);
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/main',
+            (route) => false,
+            arguments: state.user,
+          );
         }
       },
       child: Scaffold(

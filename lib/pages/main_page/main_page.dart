@@ -3,24 +3,32 @@ import 'package:flutter/material.dart';
 
 import '../../mocks/all_dialogs_mock.dart';
 import '../../models/app_user.dart';
+import '../../services/auth_services/firebase_service.dart';
+import '../../utils/app_colors.dart';
 
 class MainPage extends StatefulWidget {
-  // final AppUser user;
+  final AppUser currentUser;
 
-  const MainPage({Key? key}) : super(key: key);
+  const MainPage({Key? key, required this.currentUser}) : super(key: key);
 
   @override
   State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
+  late Future<List<AppUser>> _otherUsers;
+
+  @override
+  void initState() {
+    super.initState();
+    _otherUsers = FirebaseService.getAllUsersExcept(widget.currentUser.uid!);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // print("HOME UID: ${widget.user.uid}");
-    // print("HOME email: ${widget.user.email}");
-    // print("HOME name: ${widget.user.fullName}");
     final List<AllDialogsModel> dialogs = AllDialogsMock.allDialogs;
     return Scaffold(
+      backgroundColor: Colors.white,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 1,
         backgroundColor: Colors.white,
@@ -28,7 +36,9 @@ class _MainPageState extends State<MainPage> {
         unselectedItemColor: Colors.grey,
         onTap: (index) async {
           if (index == 2) {
-            Navigator.of(context).pushNamed('/settings');
+            Navigator.of(
+              context,
+            ).pushNamed('/settings', arguments: widget.currentUser);
           }
         },
         items: const [
@@ -47,13 +57,18 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         centerTitle: true,
-        leading: BackButton(color: Colors.white),
         elevation: 0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          children: [Text('Chatroom', style: TextStyle(color: Colors.white))],
+          children: [
+            Text(
+              'Welcome, ${widget.currentUser.fullName}',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -61,39 +76,49 @@ class _MainPageState extends State<MainPage> {
           ),
         ),
       ),
-      body: ListView.builder(
-        itemCount: dialogs.length,
-        itemBuilder: (context, index) {
-          final dialog = dialogs[index];
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 8,
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: dialog.color,
+      body: FutureBuilder<List<AppUser>>(
+        future: _otherUsers,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          final users = snapshot.data ?? [];
+          if (users.isEmpty) {
+            return const Center(child: Text('No other users found'));
+          }
+          return ListView.builder(
+            itemCount: users.length,
+            itemBuilder: (context, index) {
+              final user = users[index];
+              return Column(
+                children: [
+                  InkWell(
+                    onTap: () {
+                      print('Open chat with ${user.fullName}');
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                      child: Row(
+                        children: [
+                          _buildAvatar(user.fullName, user.uid!),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [Text(user.fullName), Text(user.email)],
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Text(dialog.avatar),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [Text(dialog.name), Text(dialog.lastMessege)],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              _buildDivider(),
-            ],
+                  ),
+                  _buildDivider(),
+                ],
+              );
+            },
           );
         },
       ),
@@ -101,11 +126,29 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget _buildDivider() {
-    return const Divider(
-      height: 3,
-      color: Colors.grey,
-      indent: 67,
-      endIndent: 20,
+    return const Padding(
+      padding: EdgeInsets.only(left: 84),
+      child: Divider(height: 0, thickness: 1, color: Color(0xFFD0D0D0)),
+    );
+  }
+
+  Widget _buildAvatar(String fullName, String uid) {
+    final parts = fullName.trim().split(" ");
+
+    String initials = "";
+    if (parts.isNotEmpty) initials += parts[0][0];
+    if (parts.length > 1) initials += parts[1][0];
+
+    final color = AppColors.generateStableColor(uid);
+    final bgColor = AppColors.adjustColorForText(color);
+
+    return CircleAvatar(
+      radius: 32,
+      backgroundColor: bgColor,
+      child: Text(
+        initials.toUpperCase(),
+        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }

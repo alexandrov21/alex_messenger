@@ -83,9 +83,11 @@ class _SignInPageState extends State<SignInPage> {
         } else if (state is SignInPageErrorState) {
           _showErrorDialog(state.errorMessage);
         } else if (state is SignInPageSuccessState) {
-          Navigator.of(
-            context,
-          ).pushNamedAndRemoveUntil('/main', (route) => false);
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            '/main',
+            (route) => false,
+            arguments: state.user,
+          );
         }
       },
       child: Scaffold(
