@@ -2,8 +2,7 @@ import 'package:alex_messenger/bloc/sign_in_page_bloc/sign_in_page_event.dart';
 import 'package:alex_messenger/bloc/sign_in_page_bloc/sign_in_page_state.dart';
 import 'package:alex_messenger/services/auth_services/auth_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../services/auth_services/firebase_service.dart';
+import '../../services/user_service/user_firestore_service.dart';
 
 class SignInPageBloc extends Bloc<SignInPageEvent, SignInPageState> {
   SignInPageBloc() : super(SignInPageInitialState()) {
@@ -28,7 +27,7 @@ class SignInPageBloc extends Bloc<SignInPageEvent, SignInPageState> {
       final user = await AuthService.signIn(email, password);
 
       if (user != null) {
-        final userFromFirestore = await FirebaseService.getUserByUid(user.uid);
+        final userFromFirestore = await FirestoreService.getUserByUid(user.uid);
         if (userFromFirestore == null) {
           emit(SignInPageErrorState("Профіль не знайдено"));
           return;

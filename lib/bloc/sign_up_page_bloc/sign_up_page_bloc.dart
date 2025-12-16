@@ -1,11 +1,10 @@
 import 'package:alex_messenger/bloc/sign_up_page_bloc/sign_up_page_event.dart';
 import 'package:alex_messenger/bloc/sign_up_page_bloc/sign_up_page_state.dart';
 import 'package:alex_messenger/services/auth_services/auth_service.dart';
-import 'package:alex_messenger/services/auth_services/firebase_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../models/app_user.dart';
+import '../../services/user_service/user_firestore_service.dart';
 
 class SignUpPageBloc extends Bloc<SignUpPageEvent, SignUpPageState> {
   SignUpPageBloc() : super(SignUpPageInitialState()) {
@@ -48,7 +47,7 @@ class SignUpPageBloc extends Bloc<SignUpPageEvent, SignUpPageState> {
           email: email,
           uid: user.uid,
         );
-        await FirebaseService.saveUser(userForFirestore);
+        await FirestoreService.saveUser(userForFirestore);
         emit(SignUpPageSuccessState(userForFirestore));
       } else {
         emit(SignUpPageErrorState('Помилка входу.'));

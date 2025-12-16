@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../../mocks/all_dialogs_mock.dart';
 import '../../models/app_user.dart';
-import '../../services/auth_services/firebase_service.dart';
+import '../../services/chat_service/chat_service.dart';
+import '../../services/user_service/user_firestore_service.dart';
 import '../../utils/app_colors.dart';
+import '../chat_page/chat_page.dart';
 
 class MainPage extends StatefulWidget {
   final AppUser currentUser;
@@ -21,7 +23,7 @@ class _MainPageState extends State<MainPage> {
   @override
   void initState() {
     super.initState();
-    _otherUsers = FirebaseService.getAllUsersExcept(widget.currentUser.uid!);
+    _otherUsers = FirestoreService.getAllUsersExcept(widget.currentUser.uid!);
   }
 
   @override
@@ -96,8 +98,23 @@ class _MainPageState extends State<MainPage> {
               return Column(
                 children: [
                   InkWell(
-                    onTap: () {
-                      print('Open chat with ${user.fullName}');
+                    onTap: () async {
+                      final chatId = await ChatService.getOrCreateChat(
+                        widget.currentUser.uid!,
+                        user.uid!,
+                      );
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ChatPage(
+                                currentUser: widget.currentUser, // 👈 Я
+                                otherUser: user, // 👈 ВІН
+                                chatId: chatId,
+                              ),
+                        ),
+                      );
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),

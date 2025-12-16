@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/app_user.dart';
 
-class FirebaseService {
+class FirestoreService {
   static final FirebaseFirestore _database = FirebaseFirestore.instance;
   static final CollectionReference users = _database.collection('users');
 

@@ -4,7 +4,7 @@ import 'package:alex_messenger/pages/main_page/main_page.dart';
 import 'package:alex_messenger/pages/settings_page/settings_page.dart';
 import 'package:alex_messenger/pages/sign_in_page/sign_in_page.dart';
 import 'package:alex_messenger/services/auth_services/auth_service.dart';
-import 'package:alex_messenger/services/auth_services/firebase_service.dart';
+import 'package:alex_messenger/services/user_service/user_firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,7 +63,7 @@ class App extends StatelessWidget {
               final firebaseUser = snapshot.data!;
               // Завантажуємо AppUser з Firestore
               return FutureBuilder<AppUser?>(
-                future: FirebaseService.getUserByUid(firebaseUser.uid),
+                future: FirestoreService.getUserByUid(firebaseUser.uid),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData) {
                     return const Scaffold(
