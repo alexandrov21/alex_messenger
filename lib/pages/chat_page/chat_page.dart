@@ -1,20 +1,14 @@
-import 'package:alex_messenger/models/app_user.dart';
+import 'package:alex_messenger/bloc/chat_page_bloc/chat_page_event.dart';
 import 'package:alex_messenger/services/chat_service/chat_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../bloc/chat_page_bloc/chat_page_bloc.dart';
+import '../../bloc/chat_page_bloc/chat_page_state.dart';
 import '../../utils/app_colors.dart';
 
 class ChatPage extends StatefulWidget {
-  final String chatId;
-  final AppUser currentUser;
-  final AppUser otherUser;
-
-  const ChatPage({
-    Key? key,
-    required this.currentUser,
-    required this.otherUser,
-    required this.chatId,
-  }) : super(key: key);
+  const ChatPage({Key? key}) : super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -33,8 +27,6 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     super.initState();
-
-    debugPrint('ChatPage opened with chatId: ${widget.chatId}');
   }
 
   @override
@@ -43,27 +35,45 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              widget.otherUser.fullName,
-              style: TextStyle(color: Colors.white),
-            ),
-          ],
+        title: BlocBuilder<ChatPageBloc, ChatPageState>(
+          builder: (context, state) {
+            if (state is ChatPageOpenedState) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    state.otherUser.fullName,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              );
+            } else if (state is ChatPageLoadingState) {
+              return Text('Loading...');
+            } else {
+              return Text('Chat');
+            }
+          },
         ),
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: Icon(Icons.keyboard_backspace_outlined, color: Colors.white),
         ),
         actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: _buildAvatar(
-              widget.otherUser.fullName,
-              widget.otherUser.uid!,
-            ),
+          BlocBuilder<ChatPageBloc, ChatPageState>(
+            builder: (context, state) {
+              if (state is ChatPageOpenedState) {
+                return Padding(
+                  padding: EdgeInsets.only(right: 12),
+                  child: _buildAvatar(
+                    state.otherUser.fullName,
+                    state.otherUser.uid!,
+                  ),
+                );
+              } else {
+                return SizedBox();
+              }
+            },
           ),
         ],
         flexibleSpace: Container(
@@ -131,12 +141,7 @@ class _ChatPageState extends State<ChatPage> {
               final text = _messageController.text.trim();
               if (text.isEmpty) return;
 
-              ChatService.sendMessage(
-                chatId: widget.chatId,
-                senderUid: widget.currentUser.uid!,
-                senderFullName: widget.currentUser.fullName,
-                text: text,
-              );
+              context.read<ChatPageBloc>().add(SendMessage(textMessage: text));
               _messageController.clear();
             },
             icon: Icon(Icons.send_rounded),
@@ -147,27 +152,28 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildMessageList() {
-    return StreamBuilder(
-      stream: ChatService.messagesStream(widget.chatId),
-      builder: (context, snapshot) {
-        // debugPrint('hasData: ${snapshot.hasData}');
-        // debugPrint('connectionState: ${snapshot.connectionState}');
-        // debugPrint('docs length: ${snapshot.data?.docs.length}');
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    return BlocBuilder<ChatPageBloc, ChatPageState>(
+      builder: (context, state) {
+        if (state is ChatPageLoadingState) {
           return Center(child: CircularProgressIndicator());
         }
+        if (state is! ChatPageOpenedState) {
+          return SizedBox();
+        }
 
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+        final messages = state.messages;
+        final currentUser = state.currentUser;
+
+        if (messages.isEmpty) {
           return Center(child: Text('No messages'));
         }
 
         return ListView.builder(
-          itemCount: snapshot.data!.docs.length,
+          itemCount: messages.length,
           itemBuilder: (context, index) {
-            final doc = snapshot.data!.docs[index];
-            final data = doc.data() as Map<String, dynamic>;
+            final message = messages[index];
 
-            final isMe = data['senderId'] == widget.currentUser.uid;
+            final isMe = message.senderId == currentUser.uid;
             return Align(
               alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
@@ -185,7 +191,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 child: Text(
-                  data['text'] ?? '',
+                  message.text,
                   style: TextStyle(color: isMe ? Colors.white : Colors.black87),
                 ),
               ),

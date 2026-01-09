@@ -1,5 +1,8 @@
+import 'package:alex_messenger/bloc/chat_page_bloc/chat_page_bloc.dart';
+import 'package:alex_messenger/bloc/chat_page_bloc/chat_page_event.dart';
 import 'package:alex_messenger/models/all_dialogs_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../mocks/all_dialogs_mock.dart';
 import '../../models/app_user.dart';
@@ -98,21 +101,20 @@ class _MainPageState extends State<MainPage> {
               return Column(
                 children: [
                   InkWell(
-                    onTap: () async {
-                      final chatId = await ChatService.getOrCreateChat(
-                        widget.currentUser.uid!,
-                        user.uid!,
-                      );
-
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              ChatPage(
-                                currentUser: widget.currentUser, // 👈 Я
-                                otherUser: user, // 👈 ВІН
-                                chatId: chatId,
+                          builder: (_) => BlocProvider(
+                            create: (_) => ChatPageBloc()
+                              ..add(
+                                ChatPageOpened(
+                                  currentUser: widget.currentUser,
+                                  otherUser: user,
+                                ),
                               ),
+                            child: ChatPage(),
+                          ),
                         ),
                       );
                     },

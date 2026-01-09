@@ -12,12 +12,10 @@ class ChatService {
   static Future<void> sendMessage({
     required String chatId,
     required String senderUid,
-    required String senderFullName,
     required String text,
   }) async {
     await messages(chatId).add({
       'senderId': senderUid,
-      'senderName': senderFullName,
       'text': text,
       'createdAt': FieldValue.serverTimestamp(),
     });
